@@ -47,3 +47,13 @@ Use `timedatectl` command to ensure the system clock is accurate. Run the follow
 timedatectl set-ntp true
 ```
 
+### SSH Connection
+
+It's also possible to connect to the Arch intall using SSH running:
+
+```bash
+systemctl start sshd
+passwd
+```
+
+Then, open a new SSH connection on ther PC.
