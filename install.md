@@ -85,3 +85,17 @@ locale-gen
 echo LANG=en_US.UTF-8 > /etc/locale.conf
 echo KEYMAP=us-acentos > /etc/vconsole.conf
 ```
+
+### Install Grub
+
+Run the following commands to install Grub using UEFI:
+
+```bash
+pacman -S grub efibootmgr
+grub-install --target=x86_64-efi --bootloader-id=Arch --recheck
+grub-mkconfig -o /boot/grub/grub.cfg
+mkdir /boot/grub/locale
+cp /usr/share/locale/en\@quot/LC_MESSAGES/grub.mo /boot/grub/locale/en.mo
+```
+
+Make sure `EFI` folder is inside `/boot` and not `/boot/EFI/EFI`. If that happen, move the inner `EFI` to `/boot`.
