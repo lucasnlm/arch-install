@@ -53,6 +53,9 @@ vm.vfs_cache_pressure=50
 
 ```bash
 arch-chroot /mnt
+
+mkinitcpio -p linux-zen
+uname -r
 ```
 
 ### Enabling Trim to SSD devices
