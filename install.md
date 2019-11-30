@@ -17,10 +17,51 @@ cat /mnt/etc/fstab
 
 Make sure your `fstab` file has all previously created partitions.
 
+### Create the swap file
+
+This is optional. Run the following:
+
+```bash
+fallocate -l 8G /mnt/swapfile
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+```
+
+Then, add the following to `fstab` file:
+
+```bash
+# Swap
+/swapfile none swap defaults 0 0
+```
+
+Check if swap is working running `free -h`.
+
+#### Check Swappiness
+
+Edit the file `/etc/sysctl.conf` and set the swappiness value.
+
+```bash
+sudo nano /etc/sysctl.conf
+
+# Add
+vm.swappiness=10
+vm.vfs_cache_pressure=50
+```
+
 ### Go to the new system
 
 ```bash
 arch-chroot /mnt
+```
+
+### Enabling Trim to SSD devices
+
+Run the following:
+
+```bash
+sed -i 's/relatime/noatime/' /mnt/etc/fstab
+arch-chroot /mnt systemctl enable fstrim.timer
 ```
 
 ### Sync time
