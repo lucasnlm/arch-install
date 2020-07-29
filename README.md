@@ -29,6 +29,14 @@ Make sure you have an active internet connection. To Wifi connections, use `wifi
 ping archlinux.org
 ```
 
+## Define your Locale
+
+Edit `/etc/locale.gen` and run:
+
+```bash
+locale-gen
+```
+
 ## UEFI
 
 Verify if you are using na UEFI or BIOS motherboard. To do it, run the following command:
@@ -64,8 +72,8 @@ Create the following partitions:
 | --------- | -------------- | ---- | ---------------- |
 | Boot      | /dev/nvme0n1p1 | 256M | EFI System       |
 | /         | /dev/nvme0n1p2 | 50G  | Linux Filesystem |
-| /home     | /dev/nvme0n1p3 | \*   | Linux Filesystem |
-| Swap     | /dev/nvme0n1p4 | 24GB   | Swap
+| Swap     | /dev/nvme0n1p3 | 24GB   | Swap            |
+| /home     | /dev/nvme0n1p4 | \*   | Linux Filesystem |
 
 Check if the partitions were created:
 
@@ -82,14 +90,14 @@ Run the following commands to format the partitions:
 ```bash
 mkfs.vfat -F32 -n EFI /dev/nvme0n1p1
 mkfs.ext4 /dev/nvme0n1p2
-mkfs.ext4 /dev/nvme0n1p3
+mkfs.ext4 /dev/nvme0n1p4
 ```
 
 For swap:
 
 ```bash
-mkswap /dev/nvme0n1p4
-swapon /dev/nvme0n1p4
+mkswap /dev/nvme0n1p3
+swapon /dev/nvme0n1p3
 ```
 
 And then mount them:
@@ -99,7 +107,7 @@ mount /dev/nvme0n1p2 /mnt
 mkdir -p /mnt/boot/EFI
 mount /dev/nvme0n1p1 /mnt/boot
 mkdir /mnt/home
-mount /dev/nvme0n1p3 /mnt/home
+mount /dev/nvme0n1p4 /mnt/home
 ls /mnt
 ```
 
@@ -211,8 +219,111 @@ refind-install
 Edit `/boot/refind_linux.conf`
 
 ```
-"Boot with standard options"  "root=/dev/nvme0n1p2 rw initrd=/boot/initramfs-linux-zen.img initrd=/boot/initramfs-linux-zen-fallback.img quiet splash"
+"Boot with standard options"  "root=/dev/nvme0n1p2 quiet splash"
 ```
+
+## Setup your LAN connection
+
+Run:
+
+```bash
+pacman -S dhcpcd
+ip link
+```
+
+To list your wireless/ethernet devices, pick the correct one, for example, it could theoretically be named `enp41s0`, and then activate dhcpcd.
+
+
+```bash
+sudo systemctl start dhcpcd@enp41s0
+```
+
+### Creating the user
+
+Define your root user password:
+
+```bash
+passwd
+```
+
+And run the following command to create your user:
+
+```bash
+useradd -m -G wheel -s /bin/bash lucasnlm
+ls /home/
+```
+
+Use the following command to set the user password if needed:
+
+```bash
+passwd lucasnlm
+```
+
+Install some useful programs, including `sudo` and add that user to `sudoers`:
+
+```bash
+pacman -S sudo
+nano /etc/sudoers
+```
+
+### Configure localhost
+
+Run the following commands to define your hostname:
+
+```bash
+echo lucasnlm > /etc/hostname
+cat /etc/hostname
+```
+
+Edit and add following to `/etc/hosts`:
+
+```
+nano /etc/hosts
+
+# Add
+
+127.0.0.1  localhost.localdomain  lucasnlm
+::1  localhost.localdomain  localhost
+127.0.1.1  lucasnlm.localdomain  lucasnlm
+```
+
+## Xorg
+
+Update the system and install X11:
+
+```bash
+pacman -Sy
+pacman -S xorg xorg-server
+```
+
+## Install nvidia
+
+Run the following commands:
+
+```bash
+pacman -S nvidia-dkms vulkan-tools
+```
+
+## Install KDE
+
+Run the following commands:
+
+```bash
+sudo pacman -S plasma-desktop sddm konsole
+sudo systemctl enable sddm
+sudo systemctl start sddm
+```
+
+Optional programs:
+
+```bash
+sudo pacman -S user-manager breeze-gtk kde-gtk-config bluedevil powerdevil plasma-nm plasma-pa
+```
+
+After login, go to settings `Input Devices > Keyboards` and make sure everything is
+correcly defined. Make sure `American Internacional` variant is selected
+(not US) on `Layouts` tabs.
+
 
 ## Install yay
 
